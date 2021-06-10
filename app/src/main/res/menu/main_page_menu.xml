@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/profile_menu"
+        android:icon="@drawable/ic_baseline_account_circle_24"
+        android:title="profile"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/stocks_owned"
+        android:icon="@drawable/ic_baseline_auto_graph_24"
+        android:title="manage stocks"
+        app:showAsAction="never" />
+</menu>
