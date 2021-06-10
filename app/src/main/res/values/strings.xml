@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Paper Trading</string>
+    <string name="add">Add favourite stocks to watch</string>
+    <string name="company_name">aapl</string>
+</resources>
