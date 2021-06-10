@@ -55,7 +55,7 @@ public class Dbhandler extends SQLiteOpenHelper {
         Cursor cursor = db.query("favourites", null, null, null, null, null, null);
         if (cursor.moveToFirst()) {
             while (!cursor.isAfterLast()) {
-                stock_list.add(cursor.getString(cursor.getColumnIndex("name")));
+                stock_list.add(cursor.getString(cursor.getColumnIndexOrThrow("name")));
                 cursor.moveToNext();
             }
         } else {
