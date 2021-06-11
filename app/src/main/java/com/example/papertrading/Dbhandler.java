@@ -13,19 +13,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Dbhandler extends SQLiteOpenHelper {
+    private String TABLE_transaction;
+  
     public Dbhandler(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-         String create = "CREATE TABLE favourites (name TEXT PRIMARY KEY)";
-         db.execSQL(create);
+         String create_fav = "CREATE TABLE favourites (name TEXT PRIMARY KEY)";
+         String create_transac = "CREATE TABLE IF NOT EXISTS "+ TABLE_transaction +" (id INT PRIMARY KEY, qty INT, comp TEXT, unit_amount INT, status INT, date DATETIME DEFAULT CURRENT_TIMESTAMP)";
+         db.execSQL(create_fav);
+         db.execSQL(create_transac);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS favourites");
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_transaction);
         onCreate(db);
     }
 
