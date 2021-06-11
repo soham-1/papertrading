@@ -32,7 +32,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private final String base = "https://cloud.iexapis.com/stable/stock/";
-    private final String token = "/quote?token=sk_2e5ca37dd8b6477a8d04c50954ddeed3";
+    private final String token = "/quote?token=" + BuildConfig.API_KEY;
     private List<String> stock_list;
     private LinearLayout favourite_stocks;
     private FloatingActionButton fab;
@@ -68,8 +68,7 @@ public class MainActivity extends AppCompatActivity {
         stock_list = handler.getAllFavourites();
         favourite_stocks = findViewById(R.id.favourite_stocks);
 
-
-//        populateList();
+        populateList();
 
         fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -90,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
         for(int i = 0; i<2; i++) {
             View view = getLayoutInflater().inflate(R.layout.stock_list, null);
             TextView company = view.findViewById(R.id.company_name);
+            TextView full_name = view.findViewById(R.id.full_name);
             TextView curr_price = view.findViewById(R.id.curr_price);
             TextView pct_change = view.findViewById(R.id.pct_change);
 
@@ -99,20 +99,27 @@ public class MainActivity extends AppCompatActivity {
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            // Display the first 500 characters of the response string.
                             Log.d("mytag", response);
 
-
-                            JSONObject result = null;
+                            JSONObject result;
                             try {
                                 result = new JSONObject(response);
                                 company.setText(result.getString("symbol"));
-                                curr_price.setText(result.getString("iexRealtimePrice"));
+                                String name = result.getString("companyName");
+                                if (name.length() > 25) name = name.substring(0, 20) + "...";
+                                full_name.setText(name);
+                                curr_price.setText(result.getString("latestPrice"));
                                 float changePercent = Float.parseFloat(result.getString("changePercent"));
                                 pct_change.setText(String.format("%.2f", changePercent) + "%");
 
-                                if (changePercent < 0) pct_change.setTextColor(Color.RED);
-                                else pct_change.setTextColor(Color.GREEN);
+                                if (changePercent < 0) {
+                                    pct_change.setTextColor(Color.RED);
+                                    curr_price.setTextColor(Color.RED);
+                                }
+                                else {
+                                    pct_change.setTextColor(Color.GREEN);
+                                    curr_price.setTextColor(Color.GREEN);
+                                }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -128,6 +135,13 @@ public class MainActivity extends AppCompatActivity {
             queue.add(stringRequest);
 
             favourite_stocks.addView(view);
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    open_activity_stock_details(company.getText().toString(), curr_price.getText().toString(), pct_change.getText().toString());
+                }
+            });
+//            view.setOnTouchListener(new );
         }
     }
 
@@ -141,12 +155,24 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 EditText symbol = dialog.findViewById(R.id.company_symbol);
-                handler.addFavourite(new Favourites(symbol.getText().toString()));
-                Log.d("mytag", symbol.getText().toString());
-                dialog.dismiss();
-                finish();
-                startActivity(getIntent());
+                String cmp_name = symbol.getText().toString();
+                if (cmp_name.equals("")) add_stocks();
+                else {
+                    handler.addFavourite(new Favourites(cmp_name));
+                    Log.d("mytag", symbol.getText().toString());
+                    dialog.dismiss();
+                    finish();
+                    startActivity(getIntent());
+                }
             }
         });
+    }
+
+    public void open_activity_stock_details(String company, String curr_price, String pct_change) {
+        Intent stock_intent = new Intent(this, stock_details.class);
+        stock_intent.putExtra("company", company);
+        stock_intent.putExtra("curr_price", curr_price);
+        stock_intent.putExtra("pct_change", pct_change);
+        startActivity(stock_intent);
     }
 }
