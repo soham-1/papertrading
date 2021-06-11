@@ -99,7 +99,6 @@ public class MainActivity extends AppCompatActivity {
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            Log.d("mytag", response);
 
                             JSONObject result;
                             try {

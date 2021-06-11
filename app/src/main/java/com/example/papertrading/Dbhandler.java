@@ -14,6 +14,7 @@ import java.util.List;
 
 public class Dbhandler extends SQLiteOpenHelper {
     private String TABLE_transaction;
+  
     public Dbhandler(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
     }
