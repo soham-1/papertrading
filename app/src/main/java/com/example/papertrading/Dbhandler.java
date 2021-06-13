@@ -145,7 +145,7 @@ public class Dbhandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         String sql_get_user = "SELECT balance FROM " + TABLE_balance + " where username = " + "soham";
         Cursor cursor = db.rawQuery(sql_get_user, null);
-        int balance = cursor.getInt(cursor.getColumnIndex("balance"));
+        int balance = cursor.getInt(cursor.getColumnIndexOrThrow("balance"));
         int total = qty * amount;
         db.close();
         if (total < balance - 2000) return false;
@@ -162,8 +162,8 @@ public class Dbhandler extends SQLiteOpenHelper {
         values.put("qty", qty);
         values.put("average_amount", unit_amount);
         if (cursor.moveToFirst()) {
-            int prev_qty = cursor.getInt(cursor.getColumnIndex("qty"));
-            int prev_amount = cursor.getInt(cursor.getColumnIndex("average_amount"));
+            int prev_qty = cursor.getInt(cursor.getColumnIndexOrThrow("qty"));
+            int prev_amount = cursor.getInt(cursor.getColumnIndexOrThrow("average_amount"));
             int new_avg = (prev_amount + (unit_amount * qty)) / (qty + prev_qty);
             values.put("average_amount", new_avg);
             return db.update(TABLE_stocksOwned, values, "comp=?", new String[] {comp.toUpperCase()});
