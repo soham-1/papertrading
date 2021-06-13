@@ -51,7 +51,7 @@ public class Transaction {
         this.unit_amount = unit_amount;
     }
 
-    public int isStatus() {
+    public int getStatus() {
         return status;
     }
 

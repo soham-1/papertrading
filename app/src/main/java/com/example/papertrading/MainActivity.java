@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
     public void populateList() {
         Log.d("mytag", stock_list.toString());
 
-        for(int i = 0; i<2; i++) {
+        for(int i = 0; i<stock_list.size(); i++) {
             View view = getLayoutInflater().inflate(R.layout.stock_list, null);
             TextView company = view.findViewById(R.id.company_name);
             TextView full_name = view.findViewById(R.id.full_name);
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
                                 result = new JSONObject(response);
                                 company.setText(result.getString("symbol"));
                                 String name = result.getString("companyName");
-                                if (name.length() > 25) name = name.substring(0, 20) + "...";
+                                if (name.length() > 25) name = name.substring(0, 25) + "...";
                                 full_name.setText(name);
                                 curr_price.setText(result.getString("latestPrice"));
                                 float changePercent = Float.parseFloat(result.getString("changePercent"));

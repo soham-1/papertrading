@@ -9,28 +9,38 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Dbhandler extends SQLiteOpenHelper {
-    private String TABLE_transaction;
-  
+    public static final String TABLE_favourites = "favourites";
+    public static final String TABLE_transaction = "transactions";
+    public static final String TABLE_balance = "balance";
+    public static final String TABLE_stocksOwned = "stocksOwned";
+
     public Dbhandler(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-         String create_fav = "CREATE TABLE favourites (name TEXT PRIMARY KEY)";
-         String create_transac = "CREATE TABLE IF NOT EXISTS "+ TABLE_transaction +" (id INT PRIMARY KEY, qty INT, comp TEXT, unit_amount INT, status INT, date DATETIME DEFAULT CURRENT_TIMESTAMP)";
+         String create_fav = "CREATE TABLE " + TABLE_favourites + " (name TEXT PRIMARY KEY)";
+         String create_transaction = "CREATE TABLE IF NOT EXISTS "+ TABLE_transaction +" (id INTEGER PRIMARY KEY AUTOINCREMENT, qty INTEGER, comp TEXT, unit_amount INTEGER, status INTEGER, date DATETIME DEFAULT CURRENT_TIMESTAMP)";
+         String create_balance = "CREATE TABLE IF NOT EXISTS "+ TABLE_balance +" (username TEXT PRIMARY KEY, password TEXT, balance INTEGER)";
+         String create_stocksOwned = "CREATE TABLE IF NOT EXISTS "+ TABLE_stocksOwned +" (comp TEXT PRIMARY KEY, qty INTEGER, average_amount INTEGER)";
          db.execSQL(create_fav);
-         db.execSQL(create_transac);
+         db.execSQL(create_transaction);
+         db.execSQL(create_balance);
+         db.execSQL(create_stocksOwned);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS favourites");
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_favourites);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_transaction);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_balance);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_stocksOwned);
         onCreate(db);
     }
 
@@ -89,6 +99,76 @@ public class Dbhandler extends SQLiteOpenHelper {
             if (deleted == 0) ls.add(stock_name);
         }
         return ls;
+    }
+
+    public void addBalance(AccountBalance ab) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("username", ab.getUsername());
+        values.put("password", ab.getPassword());
+        values.put("balance", ab.getPassword());
+        long k = db.insert(TABLE_balance, null, values);
+        Log.d("mytag", Long.toString(k));
+        db.close();
+    }
+
+    public void updateBalance(AccountBalance ab) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("username", ab.getUsername());
+        values.put("password", ab.getPassword());
+        values.put("balance", ab.getPassword());
+        db.update(TABLE_balance, values, "username=?", new String[] {ab.getUsername()});
+    }
+
+    public void addTransaction(Transaction tr) {
+        if (checkBalance(tr.getQty(), tr.getUnit_amount())) {
+            SQLiteDatabase db = this.getWritableDatabase();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            ContentValues values = new ContentValues();
+            values.put("qty", tr.getQty());
+            values.put("comp", tr.getComp());
+            values.put("unit_amount", tr.getUnit_amount());
+            values.put("status", tr.getStatus());
+            values.put("date", dateFormat.format(tr.getDate()));
+            long k = db.insert(TABLE_transaction,null, values);
+            Log.d("mytag", Long.toString(k));
+            if (k != -1) {
+                long check = addStocksOwned(tr.getComp(), tr.getQty(), tr.getUnit_amount());
+                if (check == -1) db.delete(TABLE_transaction, "id=?", new String[] {String.valueOf(check)});
+            }
+            db.close();
+        }
+    }
+
+    public boolean checkBalance(int qty, int amount) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql_get_user = "SELECT balance FROM " + TABLE_balance + " where username = " + "soham";
+        Cursor cursor = db.rawQuery(sql_get_user, null);
+        int balance = cursor.getInt(cursor.getColumnIndex("balance"));
+        int total = qty * amount;
+        db.close();
+        if (total < balance - 2000) return false;
+        return true;
+    }
+
+    public long addStocksOwned(String comp, int qty, int unit_amount) {
+        // stock name should always be in upper case for this table
+        SQLiteDatabase db = this.getWritableDatabase();
+        String sql_get_stocks = "SELECT * FROM " + TABLE_stocksOwned + " WHERE comp = " + comp.toUpperCase();
+        Cursor cursor = db.rawQuery(sql_get_stocks, null);
+        ContentValues values = new ContentValues();
+        values.put("comp", comp.toUpperCase());
+        values.put("qty", qty);
+        values.put("average_amount", unit_amount);
+        if (cursor.moveToFirst()) {
+            int prev_qty = cursor.getInt(cursor.getColumnIndex("qty"));
+            int prev_amount = cursor.getInt(cursor.getColumnIndex("average_amount"));
+            int new_avg = (prev_amount + (unit_amount * qty)) / (qty + prev_qty);
+            values.put("average_amount", new_avg);
+            return db.update(TABLE_stocksOwned, values, "comp=?", new String[] {comp.toUpperCase()});
+        }
+        return db.insert(TABLE_stocksOwned, null, values);
     }
 
 }
