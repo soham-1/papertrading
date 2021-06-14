@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void populateList() {
+        favourite_stocks.removeAllViews();
         stock_list = handler.getAllFavourites();
 
         for(int i = 0; i<stock_list.size(); i++) {

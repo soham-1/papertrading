@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,8 +14,19 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.github.mikephil.charting.charts.CandleStickChart;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.CandleData;
+import com.github.mikephil.charting.data.CandleDataSet;
+import com.github.mikephil.charting.data.CandleEntry;
+
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class stock_details extends AppCompatActivity {
@@ -22,6 +35,7 @@ public class stock_details extends AppCompatActivity {
     private String curr_price;
     private String pct_change;
     private int qty_val;
+    private CandleStickChart candleStickChart;
 
 
     @Override
@@ -57,6 +71,8 @@ public class stock_details extends AppCompatActivity {
             total_amount_val.setText("0");
             sell.setEnabled(false);
         }
+
+        setChart();
 
         buy.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -127,6 +143,67 @@ public class stock_details extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    public List<CandleEntry> add_random_values() {
+        int marketSize = 90;
+        List<CandleEntry> entries = new ArrayList<>();
+        for (int i = 0; i < marketSize; i++) {
+            float mul = marketSize + 10;
+            float val = (float) (Math.random() * 100) + mul;
+
+            float high = (float) (Math.random() * 15) + 8f;
+            float low = (float) (Math.random() * 15) + 8f;
+
+            float open = (float) (Math.random() * 6) + 1f;
+            float close = (float) (Math.random() * 6) + 1f;
+
+            boolean odd = i % 2 != 0;
+            entries.add(new CandleEntry(i+1, val + high,
+                    val - low,
+                    !odd ? val + open : val - open,
+                    odd ? val - close: val + close
+            ));
+        }
+        return entries;
+    }
+
+    public void setChart() {
+        List<CandleEntry> entries = add_random_values();
+        CandleDataSet candleDataSet = new CandleDataSet(entries, "90 days trend");
+        candleDataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+        candleDataSet.setShadowColor(Color.GRAY);
+        candleDataSet.setShadowWidth(0.5f);
+        candleDataSet.setDecreasingColor(Color.RED);
+        candleDataSet.setDecreasingPaintStyle(Paint.Style.FILL);
+        candleDataSet.setIncreasingPaintStyle(Paint.Style.FILL);
+        candleDataSet.setIncreasingColor(Color.GREEN);
+        candleDataSet.setNeutralColor(Color.BLUE);
+
+        candleStickChart = findViewById(R.id.candle_stick_chart);
+        CandleData candleData = new CandleData(candleDataSet);
+        candleStickChart.setData(candleData);
+        candleStickChart.invalidate();
+        candleStickChart.setScaleYEnabled(false);
+
+        XAxis xAxis = candleStickChart.getXAxis();
+        xAxis.setDrawGridLines(false);
+        xAxis.setTextColor(Color.WHITE);
+        xAxis.setTextSize(14);
+
+        YAxis yAxis = candleStickChart.getAxisLeft();
+        yAxis.setTextColor(Color.WHITE);
+        yAxis.setTextSize(16);
+
+        YAxis yAxis_right = candleStickChart.getAxisRight();
+        yAxis_right.setDrawLabels(false);
+
+        Legend legend = candleStickChart.getLegend();
+        legend.setTextColor(Color.WHITE);
+        legend.setTextSize(16);
+
+        Description desc = candleStickChart.getDescription();
+        desc.setEnabled(false);
     }
 
 }

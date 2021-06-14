@@ -134,13 +134,13 @@ public class Dbhandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put("username", ab.getUsername());
         values.put("password", ab.getPassword());
-        values.put("balance", ab.getPassword());
+        values.put("balance", ab.getBalance());
         db.update(TABLE_balance, values, "username=?", new String[] {ab.getUsername()});
     }
 
     public void addTransaction(Transaction tr) {
         if (tr.getStatus() == 1) {
-            if (checkBalance(tr.getQty(), tr.getUnit_amount())) {
+            if (checkBalance(tr.getQty(), tr.getUnit_amount())) { // deduct from balance
                 SQLiteDatabase db = this.getWritableDatabase();
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 ContentValues values = new ContentValues();
@@ -153,12 +153,12 @@ public class Dbhandler extends SQLiteOpenHelper {
                 Log.d("mytag", "transaction added with status buy: " + Long.toString(k));
                 if (k != -1) {
                     long check = addStocksOwned(tr.getComp().toUpperCase(), tr.getQty(), tr.getUnit_amount());
-                    if (check == -1)
-                        db.delete(TABLE_transaction, "id=?", new String[]{String.valueOf(check)});
+                    if (check == -1) db.delete(TABLE_transaction, "id=?", new String[]{String.valueOf(check)});
+                    else updateBalance(new AccountBalance("soham", "soham", getBalance()-(tr.getUnit_amount() * tr.getQty())));
                 }
                 db.close();
             }
-        } else {
+        } else { // add to balance
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             StocksOwned stocksOwned = getStocksOwned(tr.getComp().toUpperCase());
             SQLiteDatabase db = this.getWritableDatabase();
@@ -174,8 +174,8 @@ public class Dbhandler extends SQLiteOpenHelper {
             Log.d("mytag", "transaction added with status sell: " + Long.toString(k));
             if (k != -1) {
                 long check = updateStocksOwned(tr.getComp().toUpperCase(), tr.getQty());
-                if (check == -1)
-                    db.delete(TABLE_transaction, "id=?", new String[]{String.valueOf(check)});
+                if (check == -1) db.delete(TABLE_transaction, "id=?", new String[]{String.valueOf(check)});
+                else updateBalance(new AccountBalance("soham", "soham", getBalance()+(tr.getUnit_amount() * tr.getQty())));
             }
             db.close();
         }
@@ -258,7 +258,7 @@ public class Dbhandler extends SQLiteOpenHelper {
             values.put("comp", comp);
             values.put("qty", so.getQty() - qty);
             values.put("average_amount", so.getAvg_amt());
-            long k = db.update(TABLE_stocksOwned, values, "where comp = ?", new String[] {comp});
+            long k = db.update(TABLE_stocksOwned, values, "comp = ?", new String[] {comp});
             db.close();
             return k;
         }

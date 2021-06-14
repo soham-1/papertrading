@@ -68,7 +68,7 @@
                     android:layout_marginEnd="16dp"
                     android:layout_weight="1"
                     android:gravity="center_horizontal|center_vertical"
-                    android:text="Average"
+                    android:text="Unit Average"
                     android:textAlignment="center"
                     android:textColor="#FF00FF"
                     android:textSize="16sp"
@@ -76,7 +76,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="0.0" />
+                    app:layout_constraintVertical_bias="1.0" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
