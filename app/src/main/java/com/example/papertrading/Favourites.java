@@ -9,6 +9,7 @@ public class Favourites {
     public Favourites(String name) {
         this.name = name;
     }
+    public Favourites() {}
 
     public String getName() {
         return name;

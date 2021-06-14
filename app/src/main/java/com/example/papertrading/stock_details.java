@@ -12,28 +12,52 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class stock_details extends AppCompatActivity {
+    private Dbhandler handler;
+    private String company;
+    private String curr_price;
+    private String pct_change;
+    private int qty_val;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stock_details);
 
+        handler = new Dbhandler(this, "Trading", null, 1);
         Intent intent = getIntent();
-        String company = intent.getStringExtra("company");
-        String curr_price = intent.getStringExtra("curr_price");
-        String pct_change = intent.getStringExtra("pct_change");
-//        String symbol = "AAPL";
+        company = intent.getStringExtra("company");
+        curr_price = intent.getStringExtra("curr_price");
+        pct_change = intent.getStringExtra("pct_change");
         Log.d("mytag", company);
         Log.d("mytag", curr_price);
         Log.d("mytag", pct_change);
-        TextView curr_price_val = findViewById(R.id.curr_price_val);
-        curr_price_val.setText(curr_price);
-        TextView pct_change_val = findViewById(R.id.pct_change_val);
-        pct_change_val.setText(pct_change);
 
+        TextView curr_price_val = findViewById(R.id.curr_price_val);
+        TextView pct_change_val = findViewById(R.id.pct_change_val);
+        TextView qty_owned_val  = findViewById(R.id.qty_val);
+        TextView total_amount_val  = findViewById(R.id.amount_val);
         Button buy = findViewById(R.id.buy);
         Button sell = findViewById(R.id.sell);
+
+        curr_price_val.setText(curr_price);
+        pct_change_val.setText(pct_change);
+        StocksOwned so = handler.getStocksOwned(company.toUpperCase());
+        if (so.getCompany() != null) {
+            qty_owned_val.setText(String.valueOf(so.getQty()));
+            total_amount_val.setText(String.valueOf(so.getQty()*so.getAvg_amt()));
+            qty_val = so.getQty();
+        } else {
+            qty_owned_val.setText("0");
+            total_amount_val.setText("0");
+            sell.setEnabled(false);
+        }
+
         buy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -60,15 +84,18 @@ public class stock_details extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 EditText symbol = dialog.findViewById(R.id.qty_stocks);
-                String cmp_name = symbol.getText().toString();
-//                if (cmp_name.equals("")) add_stocks();
-//                else {
-//                    handler.addFavourite(new Favourites(cmp_name));
-//                    Log.d("mytag", symbol.getText().toString());
-//                    dialog.dismiss();
-//                    finish();
-//                    startActivity(getIntent());
-//                }
+                String qty = symbol.getText().toString();
+                if (qty.equals("")) buy_slip();
+                else {
+                    int _qty = (int) Math.ceil(Double.parseDouble(qty));
+                    int _curr_price = (int) Math.ceil(Double.parseDouble(curr_price));
+                    Transaction tr = new Transaction(0, _qty, company, _curr_price, 1, 0, new Date());
+                    handler.addTransaction(tr);
+                    Log.d("mytag", symbol.getText().toString());
+                    dialog.dismiss();
+                    finish();
+                    startActivity(getIntent());
+                }
             }
         });
     }
@@ -85,15 +112,19 @@ public class stock_details extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 EditText symbol = dialog.findViewById(R.id.qty_stocks);
-                String cmp_name = symbol.getText().toString();
-//                if (cmp_name.equals("")) add_stocks();
-//                else {
-//                    handler.addFavourite(new Favourites(cmp_name));
-//                    Log.d("mytag", symbol.getText().toString());
-//                    dialog.dismiss();
-//                    finish();
-//                    startActivity(getIntent());
-//                }
+                String qty = symbol.getText().toString();
+                if (qty.equals("")) sell_slip();
+                else if (Integer.parseInt(qty) > qty_val) sell_slip();
+                else {
+                    int _qty = (int) Math.ceil(Double.parseDouble(qty));
+                    int _curr_price = (int) Math.ceil(Double.parseDouble(curr_price));
+                    Transaction tr = new Transaction(0, _qty, company, _curr_price, 0, 0, new Date());
+                    handler.addTransaction(tr);
+                    Log.d("mytag", symbol.getText().toString());
+                    dialog.dismiss();
+                    finish();
+                    startActivity(getIntent());
+                }
             }
         });
     }

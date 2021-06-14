@@ -1,6 +1,8 @@
 package com.example.papertrading;
 
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
+import java.util.Date;
 
 public class Transaction {
     private int id;
@@ -8,14 +10,18 @@ public class Transaction {
     private String comp;
     private int unit_amount;
     private int status; // 1 for buy, 0 for sell
-    private SimpleDateFormat date;
+    private int gain_loss;
+    private Date date;
 
-    public Transaction(int id, int qty, String comp, int unit_amount, int status, SimpleDateFormat date) {
+    public Transaction() {}
+
+    public Transaction(int id, int qty, String comp, int unit_amount, int status, int gain_loss, Date date) {
         this.id = id;
         this.qty = qty;
         this.comp = comp;
         this.unit_amount = unit_amount;
         this.status = status;
+        this.gain_loss = gain_loss;
         this.date = date;
     }
 
@@ -59,11 +65,22 @@ public class Transaction {
         this.status = status;
     }
 
-    public SimpleDateFormat getDate() {
+    public int getGain_loss() { return gain_loss; }
+
+    public void setGain_loss(int gain_loss) { this.gain_loss = gain_loss; }
+
+    public Date getDate() {
         return date;
     }
 
-    public void setDate(SimpleDateFormat date) {
+    public void setDate(Date date) {
         this.date = date;
+    }
+}
+
+class SortByDate implements Comparator<Transaction> {
+    @Override
+    public int compare(Transaction o1, Transaction o2) {
+        return Long.valueOf(o2.getDate().getTime()).compareTo(Long.valueOf(o1.getDate().getTime()));
     }
 }

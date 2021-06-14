@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:hint="Enter qty of stocks"
-            android:inputType="textPersonName"
+            android:inputType="number"
             android:textColor="#FFFFFF"
             android:textColorHint="#FFFFFF"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -54,5 +54,6 @@
             app:layout_constraintHorizontal_bias="0.882"
             app:layout_constraintStart_toStartOf="parent"
             app:srcCompat="@android:drawable/ic_menu_send" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

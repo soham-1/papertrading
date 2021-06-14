@@ -52,8 +52,15 @@ public class MainActivity extends AppCompatActivity {
                 Intent account_intent = new Intent(this, Profile.class);
                 startActivity(account_intent);
                 return true;
-            case R.id.stocks_owned:
-                Toast.makeText(this, "stocks", Toast.LENGTH_SHORT).show();
+            case R.id.portfolio_menu:
+                Toast.makeText(this, "Portfolio", Toast.LENGTH_SHORT).show();
+                Intent portfolio_intent = new Intent(this, Portfolio.class);
+                startActivity(portfolio_intent);
+                return true;
+            case R.id.transactions:
+                Toast.makeText(this, "Transaction", Toast.LENGTH_SHORT).show();
+                Intent transaction_intent = new Intent(this, TransactionActivity.class);
+                startActivity(transaction_intent);
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -65,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         handler = new Dbhandler(this, "Trading", null, 1);
-        stock_list = handler.getAllFavourites();
         favourite_stocks = findViewById(R.id.favourite_stocks);
 
         populateList();
@@ -78,13 +84,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Log.d("mytag", handler.getAllFavourites().toString());
+        Log.d("mytag", "list of all favourites " + handler.getAllFavourites().toString());
 
         handler.close();
     }
 
     public void populateList() {
-        Log.d("mytag", stock_list.toString());
+        stock_list = handler.getAllFavourites();
 
         for(int i = 0; i<stock_list.size(); i++) {
             View view = getLayoutInflater().inflate(R.layout.stock_list, null);
@@ -158,10 +164,11 @@ public class MainActivity extends AppCompatActivity {
                 if (cmp_name.equals("")) add_stocks();
                 else {
                     handler.addFavourite(new Favourites(cmp_name));
-                    Log.d("mytag", symbol.getText().toString());
+                    Log.d("mytag", "fav_symbol: " + symbol.getText().toString());
                     dialog.dismiss();
-                    finish();
-                    startActivity(getIntent());
+//                    finish();
+//                    startActivity(getIntent());
+                    populateList();
                 }
             }
         });
