@@ -68,7 +68,7 @@ public class Dbhandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT name FROM " + TABLE_favourites + " WHERE name = '" + name + "' COLLATE NOCASE", null);
         Favourites fv = new Favourites();
-        fv.setName(cursor.getString(cursor.getColumnIndex("name")));
+        fv.setName(cursor.getString(cursor.getColumnIndexOrThrow("name")));
         db.close();
         return fv;
     }
